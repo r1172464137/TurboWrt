@@ -54,10 +54,10 @@ GITHUB_WORKSPACE="$WORKSPACE" bash "$WORKSPACE/diy.sh"
 
 echo "=== Downloading prebuilt toolchain ==="
 TOOLCHAIN_URL="https://downloads.openwrt.org/releases/25.12.4/targets/x86/64"
-TOOLCHAIN_FILE="openwrt-toolchain-25.12.4-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.xz"
-wget -q "$TOOLCHAIN_URL/$TOOLCHAIN_FILE" -O /tmp/toolchain.tar.xz
-tar -xf /tmp/toolchain.tar.xz -C /tmp/
-rm -f /tmp/toolchain.tar.xz
+TOOLCHAIN_FILE="openwrt-toolchain-25.12.4-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
+wget -q "$TOOLCHAIN_URL/$TOOLCHAIN_FILE" -O /tmp/toolchain.tar.zst
+tar --zstd -xf /tmp/toolchain.tar.zst -C /tmp/
+rm -f /tmp/toolchain.tar.zst
 # Run ext-toolchain script
 ./scripts/ext-toolchain.sh --toolchain /tmp/openwrt-toolchain-*/toolchain-*/ --config x86/64
 
