@@ -47,9 +47,7 @@ TOOLCHAIN_FILE="openwrt-toolchain-25.12.4-x86-64_gcc-14.3.0_musl.Linux-x86_64.ta
 wget -q "$TOOLCHAIN_URL/$TOOLCHAIN_FILE" -O /tmp/toolchain.tar.zst
 tar --zstd -xf /tmp/toolchain.tar.zst -C /tmp/
 rm -f /tmp/toolchain.tar.zst
-# Remove default .config if exists, then run ext-toolchain
-rm -f .config
-./scripts/ext-toolchain.sh --toolchain /tmp/openwrt-toolchain-*/toolchain-*/ --config x86/64
+./scripts/ext-toolchain.sh --toolchain /tmp/openwrt-toolchain-*/toolchain-*/ --overwrite-config --config x86/64
 
 echo "=== Applying config ==="
 cp "$WORKSPACE/config.seed" .config
