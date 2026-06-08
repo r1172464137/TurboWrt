@@ -9,10 +9,6 @@ on:
         default: false
         type: boolean
 
-env:
-  REPO_URL: https://github.com/openwrt/openwrt.git
-  REPO_BRANCH: v25.12.4
-
 permissions:
   contents: write
 
@@ -22,62 +18,62 @@ jobs:
     if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        sudo apt update -y
-        sudo apt full-upgrade -y
-        sudo apt install -y build-essential gcc-multilib g++-multilib libncurses-dev \
-          libssl-dev libelf-dev zlib1g-dev bison flex git unzip wget python3 python3-pip \
-          python3-docutils rsync file curl gettext libgmp3-dev libmpc-dev libmpfr-dev \
-          patch bc lz4 zstd p7zip p7zip-full xz-utils jq
+      - name: Maximize build space
+        uses: smallprogram/maximize-build-space@master
+        with:
+          swap-size-mb: 1024
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-haskell: "true"
+          remove-codeql: "true"
 
-    - name: Clone OpenWrt source & feeds
-      run: |
-        git clone --depth 1 --branch $REPO_BRANCH $REPO_URL openwrt
-        cd openwrt && ./scripts/feeds update -a && ./scripts/feeds install -a
+      - name: Install dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo -E apt-get -qq update
+          sudo -E apt-fast -y -qq install build-essential gcc-multilib g++-multilib \
+            libncurses-dev libssl-dev libelf-dev zlib1g-dev bison flex git unzip wget \
+            python3 python3-pip python3-docutils python3-pyelftools rsync file curl \
+            gettext libgmp3-dev libmpc-dev libmpfr-dev patch bc lz4 zstd p7zip p7zip-full \
+            xz-utils jq
 
-    - name: Setup (packages, patches, config, turboacc)
-      run: |
-        chmod +x $GITHUB_WORKSPACE/setup.sh
-        bash $GITHUB_WORKSPACE/setup.sh $GITHUB_WORKSPACE/openwrt $GITHUB_WORKSPACE
+      - name: Clone source & feeds
+        run: |
+          git clone --depth 1 --branch v25.12.4 https://github.com/openwrt/openwrt.git openwrt
+          cd openwrt && ./scripts/feeds update -a && ./scripts/feeds install -a
 
-    - name: Download sources
-      run: |
-        cd openwrt && make download -j$(nproc)
+      - name: Setup
+        run: |
+          chmod +x $GITHUB_WORKSPACE/setup.sh
+          bash $GITHUB_WORKSPACE/setup.sh $GITHUB_WORKSPACE/openwrt $GITHUB_WORKSPACE
 
-    - name: SSH connection (optional)
-      uses: mxschmitt/action-tmate@v3
-      if: ${{ github.event.inputs.ssh_connect == 'true' }}
+      - name: Download
+        run: |
+          cd openwrt && make download -j50
 
-    - name: Build firmware
-      run: |
-        cd openwrt && make -j$(nproc)
-      timeout-minutes: 360
+      - name: SSH (optional)
+        if: ${{ github.event.inputs.ssh_connect == 'true' }}
+        uses: mxschmitt/action-tmate@v3
 
-    - name: Upload firmware artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: OpenWrt-firmware
-        path: |
-          openwrt/bin/targets/x86/64/*.gz
-          openwrt/bin/targets/x86/64/*.iso
-          openwrt/bin/targets/x86/64/*.vmdk
-          openwrt/bin/targets/x86/64/*.qcow2
-          openwrt/bin/targets/x86/64/*.vhdx
-          openwrt/bin/targets/x86/64/*.manifest
-        if-no-files-found: warn
+      - name: Build
+        id: build
+        continue-on-error: true
+        run: |
+          cd openwrt && IGNORE_ERRORS=1 make -j$(($(nproc) + 1))
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v2.2.1
-      with:
-        tag_name: "Firmware-$(date +%Y%m%d-%H%M)"
-        name: "OpenWrt 固件 $(date +%Y-%m-%d)"
-        files: |
-          openwrt/bin/targets/x86/64/openwrt-x86-64-generic-ext4-combined-efi.img.gz
-          openwrt/bin/targets/x86/64/openwrt-x86-64-generic-squashfs-combined-efi.img.gz
-          openwrt/bin/targets/x86/64/openwrt-x86-64-generic-ext4-combined.img.gz
-          openwrt/bin/targets/x86/64/openwrt-x86-64-generic-squashfs-combined.img.gz
-        fail_on_unmatched: false
+      - name: Error retry
+        if: steps.build.outcome == 'failure'
+        run: |
+          cd openwrt && make -j1 V=s
+
+      - name: Release
+        uses: softprops/action-gh-release@v2.2.1
+        with:
+          tag_name: "Firmware-$(date +%Y%m%d-%H%M)"
+          files: |
+            openwrt/bin/targets/x86/64/openwrt-x86-64-generic-ext4-combined-efi.img.gz
+            openwrt/bin/targets/x86/64/openwrt-x86-64-generic-squashfs-combined-efi.img.gz
+          fail_on_unmatched: false
