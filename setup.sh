@@ -41,6 +41,16 @@ for sub in luci-app-homeproxy luci-app-nikki luci-app-passwall luci-app-dae luci
 done
 cd "$OPENWRT_DIR"
 
+echo "=== Downloading prebuilt toolchain ==="
+TOOLCHAIN_URL="https://downloads.openwrt.org/releases/25.12.4/targets/x86/64"
+TOOLCHAIN_FILE="openwrt-toolchain-25.12.4-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
+wget -q "$TOOLCHAIN_URL/$TOOLCHAIN_FILE" -O /tmp/toolchain.tar.zst
+tar --zstd -xf /tmp/toolchain.tar.zst -C /tmp/
+rm -f /tmp/toolchain.tar.zst
+# Remove default .config if exists, then run ext-toolchain
+rm -f .config
+./scripts/ext-toolchain.sh --toolchain /tmp/openwrt-toolchain-*/toolchain-*/ --config x86/64
+
 echo "=== Applying config ==="
 cp "$WORKSPACE/config.seed" .config
 
@@ -51,15 +61,6 @@ cat "$WORKSPACE/patches/config-append.txt" >> target/linux/generic/config-6.12
 
 echo "=== Running diy.sh ==="
 GITHUB_WORKSPACE="$WORKSPACE" bash "$WORKSPACE/diy.sh"
-
-echo "=== Downloading prebuilt toolchain ==="
-TOOLCHAIN_URL="https://downloads.openwrt.org/releases/25.12.4/targets/x86/64"
-TOOLCHAIN_FILE="openwrt-toolchain-25.12.4-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
-wget -q "$TOOLCHAIN_URL/$TOOLCHAIN_FILE" -O /tmp/toolchain.tar.zst
-tar --zstd -xf /tmp/toolchain.tar.zst -C /tmp/
-rm -f /tmp/toolchain.tar.zst
-# Run ext-toolchain script
-./scripts/ext-toolchain.sh --toolchain /tmp/openwrt-toolchain-*/toolchain-*/ --config x86/64
 
 echo "=== Adding turboacc (no SFE) ==="
 curl -sSL https://raw.githubusercontent.com/chenmozhijin/turboacc/luci/add_turboacc.sh -o add_turboacc.sh
