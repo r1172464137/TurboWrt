@@ -1,131 +1,177 @@
-<h1 align="center">OpenWrt 25.12.4 定制固件</h1>
+<div align="center">
+
+# ⚡ OpenWrt 25.12.4 定制固件
+
 <p align="center">
-基于官方 OpenWrt v25.12.4 编译，针对 x86/64 软路由优化
+  <b>基于官方 OpenWrt v25.12.4 · 专为 x86/64 软路由优化</b>
 </p>
 
----
+<p align="center">
+  <img src="https://img.shields.io/badge/OpenWrt-25.12.4-00a854?style=flat-square&logo=openwrt&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Kernel-6.12.87-3572A5?style=flat-square&logo=linux&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Arch-x86__64-0078D6?style=flat-square&logo=amd&logoColor=white"/>
+  <img src="https://img.shields.io/badge/BBRv3-enabled-FF6F00?style=flat-square"/>
+  <img src="https://img.shields.io/badge/FullCone-enabled-4CAF50?style=flat-square"/>
+  <img src="https://img.shields.io/github/downloads/r1172464137/openwrt-custom-fw/total?style=flat-square"/>
+</p>
 
-### 特性
-
-- 基于 **官方 OpenWrt 25.12.4** 编译，默认管理地址 192.168.1.1
-- **HTTP 默认**，无需 HTTPS 自签名证书
-- 预配置了大量插件，可无脑 opkg/apk kmod
-- 内置 **ImmortalWrt 软件源**，刷机后可直接 `apk add` 更多包
-- **BBRv3** 默认启用
-- **FullCone NAT**（turboacc 管理）
-- **Flow Offloading** 流量分载
-
----
-
-### 包含的插件
-
-**加速相关：**
-- `luci-app-turboacc` — Flow Offload / FullCone / BBR
-- `kmod-nft-fullcone` — 全锥型 NAT
-- `kmod-nft-offload` — 流量分载
-- BBRv3 — 最新 TCP 拥塞控制算法
-
-**代理相关：**
-- `luci-app-passwall` — 全能代理
-- `luci-app-homeproxy` — 基于 sing-box 的代理
-- `luci-app-nikki` — 轻量代理
-- `luci-app-dae` — eBPF 代理
-
-**网络工具：**
-- `luci-app-mosdns` — DNS 分流/广告过滤
-- `luci-app-bandix` — 流量监控
-- `luci-app-easytier` — 组网工具
-- `luci-app-lucky` — 综合工具
-- `luci-app-ddns-go` — DDNS
-- `zerotier` — 虚拟组网
-
-**系统工具：**
-- `luci-app-ttyd` — Web 终端（免密直接进 shell）
-- `luci-app-filemanager` — 文件管理
-- `luci-app-watchcat` — 看门狗
-- `luci-app-sqm` — QoS 流量整形
-- `luci-app-upnp` — UPnP
-- `luci-app-aurora-config` — Aurora 主题配置
-- `coremark` / `htop` / `ethtool` / `jq` / `yq`
-
-**主题：**
-- `luci-theme-argon` — Argon 主题
-- `luci-theme-aurora` — Aurora 主题
-- `luci-theme-shadcn` — ShadCN 风格主题
+</div>
 
 ---
 
-### 系统优化
+## 📋 特性一览
 
-| 优化项 | 说明 |
-|--------|------|
-| `mitigations=off` | 关闭 CPU 安全缓解，提升性能 |
-| TEO 空闲调度 | 替代 Menu governor，适合路由场景 |
-| Netkit | 内核新网络框架 |
-| BBRv3 | 19 个内核补丁，最新的 TCP 拥塞控制 |
-| Nginx HTTP only | 去掉 HTTPS，默认 80 端口 |
-| Nginx 调优 | 缓冲区翻倍，超时延长 |
-| uwsgi 调优 | 线程/进程数增加，性能提升 |
-| rpcd 超时 | 30s → 60s |
-| conntrack 调优 | 减少 TCP 重传误判 |
-| 防火墙流量卸载 UI | 已移除，由 turboacc 替代 |
+<table>
+<tr>
+<td width="50%">
 
-### 内核补丁
+### 🚀 性能优化
+- `mitigations=off` — 关闭 CPU 安全缓解
+- **TEO 空闲调度** — 更低延迟
+- **Netkit** — 内核新网络框架
+- **BBRv3** — 最新 TCP 拥塞控制
+- **FullCone NAT** — turboacc 管理
+- **Flow Offloading** — 流量分载
+- **conntrack 调优** — 减少重传误判
 
-- **BBRv3** — 19 个补丁，Google 最新 TCP 拥塞控制
-- **IGC EEE 关断** — 解决 i225/i226 网卡断流
-- **WireGuard hotplug** — WG 接口触发 hotplug 事件
-- **TCP collapse 跳过** — Cloudflare 出品，减少高吞吐延迟抖动
-- **BTF 静默** — 关掉 BTF 警告信息
-- **DHCPv6 hotplug** — 获取 IPv6 时触发 hotplug 事件
-- **odhcpd/odhcp6c 更新** — 升级到最新版，修复多个 bug
+</td>
+<td width="50%">
 
-### 软件源更新
+### 🧩 内核补丁
+- 🔹 **BBRv3** × 19 补丁
+- 🔹 **IGC EEE 关断** — i225/i226 防断流
+- 🔹 **WireGuard hotplug**
+- 🔹 **TCP collapse 跳过**
+- 🔹 **BTF 静默**
+- 🔹 **DHCPv6 hotplug**
+- 🔹 **odhcpd/odhcp6c** 更新
 
-| 包 | 说明 |
-|----|------|
-| golang | 更新到最新版 |
-| Node.js | 替换为 prebuilt 版，避免编译耗时 |
-| miniupnpd | 更新到最新版 + 7 个上游补丁 |
+</td>
+</tr>
+<tr>
+<td>
+
+### 🌐 网络增强
+- **HTTP 默认** — 无需 HTTPS 证书
+- **Nginx 调优** — 缓冲区翻倍
+- **uwsgi 调优** — 线程/进程增加
+- **rpcd 超时** — 30s → 60s
+- **ImmortalWrt 源预置** — 刷机即用
+- **迷你 UPnP** — 更新+补丁
+
+</td>
+<td>
+
+### 🛠️ 系统优化
+- **golang / Node.js** 最新版
+- **Docker 支持** — dockerman 控制面板
+- **cgroup v2 支持** — Docker 兼容
+- **fstool** — 一键格式化挂盘
+- **自定义 nft 规则** — 防火墙增强
+- **`fuck` 命令** — 一键重置
+
+</td>
+</tr>
+</table>
 
 ---
 
-### 使用方法
+## 📦 包含的插件
 
-#### 下载固件
+<details open>
+<summary><b>点击展开/收起</b></summary>
 
-前往 Releases 页面下载对应格式的固件，解压后写入磁盘。
+### ⚡ 加速相关
+| 插件 | 说明 |
+|------|------|
+| `luci-app-turboacc` | Flow Offload / FullCone / BBR 控制 |
+| `kmod-nft-fullcone` | 全锥型 NAT |
+| `kmod-nft-offload` | 流量分载 |
+| BBRv3 | Google 最新 TCP 拥塞控制算法 |
 
-推荐 `ext4-combined-efi.img.gz`（UEFI 引导）。
+### 🔒 代理相关
+| 插件 | 说明 |
+|------|------|
+| `luci-app-passwall` | 全能代理 |
+| `luci-app-homeproxy` | 基于 sing-box 的代理 |
+| `luci-app-nikki` | 轻量代理 |
+| `luci-app-dae` | eBPF 代理 |
 
-#### GitHub Actions 云编译
+### 🌍 网络工具
+| 插件 | 说明 |
+|------|------|
+| `luci-app-mosdns` | DNS 分流 / 广告过滤 |
+| `luci-app-bandix` | 网络流量监控 |
+| `luci-app-easytier` | 组网工具 |
+| `luci-app-lucky` | 综合工具 |
+| `luci-app-ddns-go` | DDNS 动态域名 |
+| `zerotier` | 虚拟组网 |
+| `luci-app-sqm` | QoS 流量整形 |
+| `luci-app-upnp` | UPnP 端口映射 |
 
-1. Fork 本仓库
-2. 前往 Actions 页面
-3. 点击 **Run workflow**
-4. 等待编译完成（约 2-3 小时）
-5. 下载生成的固件 Artifacts
+### 🖥️ 系统工具
+| 插件 | 说明 |
+|------|------|
+| `luci-app-ttyd` | Web 终端（免密） |
+| `luci-app-filemanager` | 文件管理 |
+| `luci-app-watchcat` | 系统看门狗 |
+| `luci-app-aurora-config` | Aurora 主题配置 |
+| `coremark` / `htop` / `ethtool` | 系统工具 |
 
-#### 刷机后
+### 🎨 主题
+| 主题 | 说明 |
+|------|------|
+| `luci-theme-argon` | 最流行的 Argon 主题 |
+| `luci-theme-aurora` | Aurora 主题 |
+| `luci-theme-shadcn` | ShadCN 风格主题 |
+
+</details>
+
+---
+
+## 🚀 使用方法
+
+### 下载固件
+
+前往 [Releases](https://github.com/r1172464137/openwrt-custom-fw/releases) 页面下载。
+
+推荐使用 **`ext4-combined-efi.img.gz`**（UEFI 引导）。
+
+### 刷机
 
 ```bash
-# 更新源
-apk update
+# 解压
+gunzip openwrt-x86-64-generic-ext4-combined-efi.img.gz
 
-# 从 ImmortalWrt 源安装额外包
+# 写入磁盘（替换 /dev/sdX 为你的磁盘）
+dd if=openwrt-x86-64-generic-ext4-combined-efi.img of=/dev/sdX bs=4M status=progress
+```
+
+### GitHub Actions 云编译
+
+1. 前往 [Actions](https://github.com/r1172464137/openwrt-custom-fw/actions) 页面
+2. 点击 **Run workflow**
+3. 等待编译完成（约 2-3 小时）
+4. 下载生成的固件 Artifacts
+
+### 刷机后
+
+```bash
+# 从 ImmortalWrt 源安装更多包
+apk update
 apk add luci-app-openclash
 apk add luci-app-ssr-plus
 ```
 
 ---
 
-### 鸣谢
+## 📄 鸣谢
 
-| 项目 | 说明 |
-|------|------|
-| [OpenWrt](https://github.com/openwrt/openwrt) | 官方 OpenWrt 源码 |
-| [chenmozhijin/turboacc](https://github.com/chenmozhijin/turboacc) | FullCone NAT 加速 |
-| [QiuSimons/YAOF](https://github.com/QiuSimons/YAOF) | 部分补丁来源 |
-| [ImmortalWrt](https://github.com/immortalwrt) | 软件源及 APK 签名 |
-| [sbwml](https://github.com/sbwml) | 各种软件包 |
-| 各第三方插件作者 | |
+<p align="center">
+  <a href="https://github.com/openwrt/openwrt"><img src="https://img.shields.io/badge/OpenWrt-官方源码-00a854?style=flat-square&logo=openwrt"/></a>
+  <a href="https://github.com/chenmozhijin/turboacc"><img src="https://img.shields.io/badge/turboacc-FullCone_NAT-FF6F00?style=flat-square"/></a>
+  <a href="https://github.com/QiuSimons/YAOF"><img src="https://img.shields.io/badge/YAOF-补丁参考-1a73e8?style=flat-square"/></a>
+  <a href="https://github.com/immortalwrt"><img src="https://img.shields.io/badge/ImmortalWrt-软件源-e65100?style=flat-square"/></a>
+  <a href="https://github.com/sbwml"><img src="https://img.shields.io/badge/sbwml-软件包-6f42c1?style=flat-square"/></a>
+  <a href="https://github.com/wukongdaily/img-installer"><img src="https://img.shields.io/badge/img--installer-ISO生成-4FC08D?style=flat-square"/></a>
+</p>
