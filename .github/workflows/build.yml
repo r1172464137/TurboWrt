@@ -39,6 +39,17 @@ jobs:
         git clone --depth 1 --branch $REPO_BRANCH $REPO_URL openwrt
         cd openwrt && ./scripts/feeds update -a && ./scripts/feeds install -a
 
+    - name: Cache toolchain
+      id: cache-toolchain
+      uses: actions/cache@v4
+      with:
+        path: |
+          openwrt/staging_dir/toolchain-*
+          openwrt/build_dir/toolchain-*
+          openwrt/staging_dir/host
+          openwrt/build_dir/host
+        key: toolchain-${{ hashFiles('openwrt/target/linux/x86/Makefile', 'openwrt/toolchain/**') }}
+
     - name: Setup (packages, patches, config, turboacc)
       run: |
         chmod +x $GITHUB_WORKSPACE/setup.sh
