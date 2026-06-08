@@ -51,13 +51,7 @@ sed -i 's/command .\/bin\/login/command \/bin\/sh/' feeds/packages/utils/ttyd/fi
 # === Batch 8: Firewall offload UI removal ===
 sed -i '/Netfilter flow offload/,/};/c\		/* Netfilter flow offload - disabled, handled by TurboACC */' feeds/luci/applications/luci-app-firewall/htdocs/luci-static/resources/view/firewall/zones.js
 
-# === Batch 9: Update odhcpd/odhcp6c to latest ===
-sed -i 's/PKG_SOURCE_DATE:=2026-03-16/PKG_SOURCE_DATE:=2026-05-30/' package/network/services/odhcpd/Makefile
-sed -i 's/PKG_SOURCE_VERSION:=edf2e523b7ae23830a7377343b66c7675c7703c7/PKG_SOURCE_VERSION:=1782f3f2aad21cd7971798c898355a12a9611304/' package/network/services/odhcpd/Makefile
-sed -i 's/PKG_SOURCE_DATE:=2026-01-25/PKG_SOURCE_DATE:=2026-05-30/' package/network/ipv6/odhcp6c/Makefile
-sed -i 's/PKG_SOURCE_VERSION:=ee2949e3a70a1dd4905d83abf8fb8135b420ca17/PKG_SOURCE_VERSION:=daf4ec3054e753c99fdcc3ac5464926548b38351/' package/network/ipv6/odhcp6c/Makefile
-
-# === Batch 10: ImmortalWrt APK repo ===
+# === Batch 9: ImmortalWrt APK repo ===
 mkdir -p package/base-files/files/etc/apk/keys
 mkdir -p package/base-files/files/etc/apk/repositories.d
 cat > package/base-files/files/etc/apk/keys/immortalwrt-snapshots.pem << 'EOF'
@@ -78,7 +72,7 @@ AFYrTnqJrnURywsKpD+ZKCLjPluvoHe/FABIvIuHLvICALA3IMjhm0Z0cA==
 -----END PUBLIC KEY-----
 EOF
 
-# === Batch 11: uci-defaults for nginx HTTP ===
+# === Batch 10: uci-defaults for nginx HTTP ===
 cat > package/base-files/files/etc/uci-defaults/99-disable-https-redirect << 'EOF'
 #!/bin/sh
 uci delete nginx._redirect2ssl 2>/dev/null
@@ -89,13 +83,13 @@ uci commit nginx
 exit 0
 EOF
 
-# === Batch 12: conntrack ===
+# === Batch 11: conntrack ===
 echo "net.netfilter.nf_conntrack_tcp_max_retrans=5" >> package/kernel/linux/files/sysctl-nf-conntrack.conf
 
-# === Batch 13: Remove 952 patch (kernel 6.12.87 has it built-in) ===
+# === Batch 12: Remove 952 patch (kernel 6.12.87 has it built-in) ===
 rm -f target/linux/generic/hack-6.12/952-add-net-conntrack-events-support-multiple-registrant.patch
 
-# === Batch 14: DHCPv6 hotplug ===
+# === Batch 13: DHCPv6 hotplug ===
 patch -p1 < $GITHUB_WORKSPACE/patches/odhcp6c/1002-odhcp6c-support-dhcpv6-hotplug.patch
 
 echo "diy.sh completed"
