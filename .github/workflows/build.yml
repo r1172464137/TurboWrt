@@ -48,7 +48,7 @@ jobs:
           openwrt/build_dir/toolchain-*
           openwrt/staging_dir/host
           openwrt/build_dir/host
-        key: toolchain-${{ hashFiles('openwrt/target/linux/x86/Makefile', 'openwrt/toolchain/**') }}
+        key: toolchain-v1-${{ hashFiles('openwrt/target/linux/x86/Makefile') }}
 
     - name: Setup (packages, patches, config, turboacc)
       run: |
