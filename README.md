@@ -1,7 +1,3 @@
-<p align="center">
-<img width="768" src="https://raw.githubusercontent.com/QiuSimons/Others/master/YAOF.png" >
-</p>
-
 <h1 align="center">OpenWrt 25.12.4 定制固件</h1>
 <p align="center">
 基于官方 OpenWrt v25.12.4 编译，针对 x86/64 软路由优化
