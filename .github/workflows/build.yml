@@ -51,6 +51,14 @@ jobs:
       uses: mxschmitt/action-tmate@v3
       if: ${{ github.event.inputs.ssh_connect == 'true' }}
 
+    - name: Build tools (sequential)
+      run: |
+        cd openwrt && make tools/compile -j1 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+    - name: Build toolchain
+      run: |
+        cd openwrt && make toolchain/compile -j$(nproc) PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
     - name: Build firmware
       run: |
         cd openwrt && make -j$(nproc) PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
