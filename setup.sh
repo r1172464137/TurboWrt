@@ -56,6 +56,9 @@ echo "=== Adding turboacc (no SFE) ==="
 curl -sSL https://raw.githubusercontent.com/chenmozhijin/turboacc/luci/add_turboacc.sh -o add_turboacc.sh
 bash add_turboacc.sh --no-sfe
 
+# Remove 952 patch again - turboacc re-adds it but kernel 6.12.87 already has it
+rm -f target/linux/generic/hack-6.12/952-add-net-conntrack-events-support-multiple-registrant.patch
+
 echo "=== Running defconfig ==="
 make defconfig
 

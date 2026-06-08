@@ -86,9 +86,6 @@ EOF
 # === Batch 11: conntrack ===
 echo "net.netfilter.nf_conntrack_tcp_max_retrans=5" >> package/kernel/linux/files/sysctl-nf-conntrack.conf
 
-# === Batch 12: Remove 952 patch (kernel 6.12.87 has it built-in) ===
-rm -f target/linux/generic/hack-6.12/952-add-net-conntrack-events-support-multiple-registrant.patch
-
 # === Batch 13: DHCPv6 hotplug ===
 patch -p1 < $GITHUB_WORKSPACE/patches/odhcp6c/1002-odhcp6c-support-dhcpv6-hotplug.patch
 
