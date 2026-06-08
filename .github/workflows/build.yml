@@ -8,8 +8,6 @@ on:
         required: false
         default: false
         type: boolean
-  push:
-    branches: [main]
 
 env:
   REPO_URL: https://github.com/openwrt/openwrt.git
