@@ -64,8 +64,6 @@
 
 ### 🛠️ 系统优化
 - **golang / Node.js** 最新版
-- **Docker 支持** — dockerman 控制面板
-- **cgroup v2 支持** — Docker 兼容
 - **fstool** — 一键格式化挂盘
 - **自定义 nft 规则** — 防火墙增强
 - **`fuck` 命令** — 一键重置
