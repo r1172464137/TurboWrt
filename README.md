@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/Arch-x86__64-0078D6?style=flat-square&logo=amd&logoColor=white"/>
   <img src="https://img.shields.io/badge/BBRv3-enabled-FF6F00?style=flat-square"/>
   <img src="https://img.shields.io/badge/FullCone-enabled-4CAF50?style=flat-square"/>
-  <img src="https://img.shields.io/github/downloads/r1172464137/openwrt-custom-fw/total?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Docker-ready-2496ED?style=flat-square&logo=docker"/>
 </p>
 
 </div>
@@ -62,11 +62,12 @@
 </td>
 <td>
 
-### 🛠️ 系统优化
-- **golang / Node.js** 最新版
-- **fstool** — 一键格式化挂盘
-- **自定义 nft 规则** — 防火墙增强
-- **`fuck` 命令** — 一键重置
+### 🐳 Docker 支持
+- **dockerd** — Docker 守护进程
+- **luci-app-dockerman** — Web 管理面板
+- **cgroup v2** — 兼容 Docker systemd
+- **VETH / OverlayFS** — 内核支持
+- **网桥过滤** — Bridge netfilter 开启
 
 </td>
 </tr>
@@ -85,7 +86,14 @@
 | `luci-app-turboacc` | Flow Offload / FullCone / BBR 控制 |
 | `kmod-nft-fullcone` | 全锥型 NAT |
 | `kmod-nft-offload` | 流量分载 |
-| BBRv3 | Google 最新 TCP 拥塞控制算法 |
+
+### 🐳 容器
+| 插件 | 说明 |
+|------|------|
+| `dockerd` | Docker 守护进程 |
+| `docker` | Docker 命令行工具 |
+| `luci-app-dockerman` | Docker 管理面板 |
+| `luci-lib-docker` | Docker LuCI 库 |
 
 ### 🔒 代理相关
 | 插件 | 说明 |
@@ -132,7 +140,6 @@
 ### 下载固件
 
 前往 [Releases](https://github.com/r1172464137/openwrt-custom-fw/releases) 页面下载。
-
 推荐使用 **`ext4-combined-efi.img.gz`**（UEFI 引导）。
 
 ### 刷机
@@ -149,7 +156,7 @@ dd if=openwrt-x86-64-generic-ext4-combined-efi.img of=/dev/sdX bs=4M status=prog
 
 1. 前往 [Actions](https://github.com/r1172464137/openwrt-custom-fw/actions) 页面
 2. 点击 **Run workflow**
-3. 等待编译完成（约 2-3 小时）
+3. 等待编译完成（约 3-4 小时，第二次起因缓存会更快）
 4. 下载生成的固件 Artifacts
 
 ### 刷机后
@@ -159,6 +166,9 @@ dd if=openwrt-x86-64-generic-ext4-combined-efi.img of=/dev/sdX bs=4M status=prog
 apk update
 apk add luci-app-openclash
 apk add luci-app-ssr-plus
+
+# 如需卸载 DDNS（本固件已移除）
+apk del ddns-scripts luci-app-ddns
 ```
 
 ---
@@ -170,6 +180,5 @@ apk add luci-app-ssr-plus
   <a href="https://github.com/chenmozhijin/turboacc"><img src="https://img.shields.io/badge/turboacc-FullCone_NAT-FF6F00?style=flat-square"/></a>
   <a href="https://github.com/QiuSimons/YAOF"><img src="https://img.shields.io/badge/YAOF-补丁参考-1a73e8?style=flat-square"/></a>
   <a href="https://github.com/immortalwrt"><img src="https://img.shields.io/badge/ImmortalWrt-软件源-e65100?style=flat-square"/></a>
-  <a href="https://github.com/sbwml"><img src="https://img.shields.io/badge/sbwml-软件包-6f42c1?style=flat-square"/></a>
-  <a href="https://github.com/wukongdaily/img-installer"><img src="https://img.shields.io/badge/img--installer-ISO生成-4FC08D?style=flat-square"/></a>
+  <a href="https://github.com/lisaac/luci-app-dockerman"><img src="https://img.shields.io/badge/dockerman-容器管理-2496ED?style=flat-square&logo=docker"/></a>
 </p>
