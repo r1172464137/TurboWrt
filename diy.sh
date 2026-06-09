@@ -45,8 +45,10 @@ sed -i 's/option timeout 30/option timeout 60/' package/system/rpcd/files/rpcd.c
 # === Batch 6: rpc.js ===
 sed -i 's/rpctimeout \?\? 20/rpctimeout ?? 60/' feeds/luci/modules/luci-base/htdocs/luci-static/resources/rpc.js
 
-# === Batch 7: ttyd no login ===
+# === Batch 7: ttyd no login + disable CPD ===
 sed -i 's/command .\/bin\/login/command \/bin\/sh/' feeds/packages/utils/ttyd/files/ttyd.config
+# Disable libwebsockets captive portal detection (noisy logs when no WAN)
+sed -i '/procd_set_param stderr 1/a\\tprocd_set_param env LWS_CPD_DISABLE 1' feeds/packages/utils/ttyd/files/ttyd.init
 
 # === Batch 8: Firewall offload UI removal ===
 sed -i '/Netfilter flow offload/,/};/c\		/* Netfilter flow offload - disabled, handled by TurboACC */' feeds/luci/applications/luci-app-firewall/htdocs/luci-static/resources/view/firewall/zones.js
@@ -86,7 +88,7 @@ EOF
 # === Batch 11: conntrack ===
 echo "net.netfilter.nf_conntrack_tcp_max_retrans=5" >> package/kernel/linux/files/sysctl-nf-conntrack.conf
 
-# === Batch 13: DHCPv6 hotplug ===
+# === Batch 12: DHCPv6 hotplug ===
 patch -p1 < $GITHUB_WORKSPACE/patches/odhcp6c/1002-odhcp6c-support-dhcpv6-hotplug.patch
 
 echo "diy.sh completed"
