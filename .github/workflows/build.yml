@@ -45,33 +45,20 @@ jobs:
           git clone --depth 1 --branch v25.12.4 https://github.com/openwrt/openwrt.git openwrt
           cd openwrt && ./scripts/feeds update -a && ./scripts/feeds install -a
 
-      - name: Setup (packages, config, patches, turboacc)
+      - name: Setup (packages, patches, toolchain, config, turboacc)
+        id: setup
         run: |
           chmod +x $GITHUB_WORKSPACE/setup.sh
           bash $GITHUB_WORKSPACE/setup.sh $GITHUB_WORKSPACE/openwrt $GITHUB_WORKSPACE
-
-      - name: Download toolchain + compile tools
-        id: toolchain
-        run: |
-          cd openwrt
-          if [ -d staging_dir/toolchain-x86_64_gcc-14.3.0_musl ]; then
-            echo "cache-hit=true" >> $GITHUB_OUTPUT
-            echo "=== Toolchain already cached ==="
-          else
+          # Determine if toolchain was freshly built
+          if [ -f /tmp/toolchain_fresh ]; then
             echo "cache-hit=false" >> $GITHUB_OUTPUT
-            echo "=== Downloading prebuilt toolchain ==="
-            wget -q "https://downloads.openwrt.org/releases/25.12.4/targets/x86/64/openwrt-toolchain-25.12.4-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.zst" -O /tmp/tc.tar.zst
-            tar --zstd -xf /tmp/tc.tar.zst -C /tmp/
-            rm /tmp/tc.tar.zst
-            ./scripts/ext-toolchain.sh --toolchain /tmp/openwrt-toolchain-*/toolchain-*/ --overwrite-config --config x86/64
-            make defconfig
-            echo "=== Compiling host tools ==="
-            make tools/compile -j$(nproc)
-            make toolchain/compile -j$(nproc)
+          else
+            echo "cache-hit=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Cache toolchain + host tools
-        if: steps.toolchain.outputs.cache-hit == 'false'
+        if: steps.setup.outputs.cache-hit == 'false'
         uses: actions/cache/save@v4
         with:
           path: |
@@ -80,7 +67,7 @@ jobs:
             openwrt/staging_dir/hostpkg
             openwrt/build_dir/host
             openwrt/build_dir/toolchain-x86_64_gcc-14.3.0_musl
-          key: toolchain-v3
+          key: toolchain-v4
 
       - name: Download package sources
         run: |

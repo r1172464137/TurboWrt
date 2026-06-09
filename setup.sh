@@ -41,17 +41,18 @@ for sub in luci-app-homeproxy luci-app-nikki luci-app-passwall luci-app-dae luci
 done
 cd "$OPENWRT_DIR"
 
+echo "=== Setting up toolchain (download if not cached) ==="
 if [ ! -d staging_dir/toolchain-x86_64_gcc-14.3.0_musl ]; then
-  echo "=== Downloading prebuilt toolchain ==="
-  TOOLCHAIN_URL="https://downloads.openwrt.org/releases/25.12.4/targets/x86/64"
-  TOOLCHAIN_FILE="openwrt-toolchain-25.12.4-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
-  wget -q "$TOOLCHAIN_URL/$TOOLCHAIN_FILE" -O /tmp/toolchain.tar.zst
-  tar --zstd -xf /tmp/toolchain.tar.zst -C /tmp/
-  rm -f /tmp/toolchain.tar.zst
-  ./scripts/ext-toolchain.sh --toolchain /tmp/openwrt-toolchain-*/toolchain-*/ --overwrite-config --config x86/64
-else
-  echo "=== Toolchain cached, using it ==="
-  ./scripts/ext-toolchain.sh --toolchain staging_dir/toolchain-x86_64_gcc-14.3.0_musl --overwrite-config --config x86/64
+  wget -q "https://downloads.openwrt.org/releases/25.12.4/targets/x86/64/openwrt-toolchain-25.12.4-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.zst" -O /tmp/tc.tar.zst
+  tar --zstd -xf /tmp/tc.tar.zst -C /tmp/
+  rm /tmp/tc.tar.zst
+  ./scripts/ext-toolchain.sh --toolchain /tmp/openwrt-toolchain-*/toolchain-*/ --config x86/64
+  make defconfig
+  # Compile host tools
+  make tools/compile -j$(nproc)
+  make toolchain/compile -j$(nproc)
+  # Marker for cache save
+  touch /tmp/toolchain_fresh
 fi
 
 echo "=== Applying config ==="
@@ -69,7 +70,7 @@ echo "=== Adding turboacc (no SFE) ==="
 curl -sSL https://raw.githubusercontent.com/chenmozhijin/turboacc/luci/add_turboacc.sh -o add_turboacc.sh
 bash add_turboacc.sh --no-sfe
 
-# Remove 952 patch again - turboacc re-adds it but kernel 6.12.87 already has it
+# Remove 952 patch - turboacc re-adds it but kernel 6.12.87 has it built-in
 rm -f target/linux/generic/hack-6.12/952-add-net-conntrack-events-support-multiple-registrant.patch
 
 echo "=== Running defconfig ==="
