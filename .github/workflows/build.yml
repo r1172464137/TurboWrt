@@ -45,44 +45,19 @@ jobs:
           git clone --depth 1 --branch v25.12.4 https://github.com/openwrt/openwrt.git openwrt
           cd openwrt && ./scripts/feeds update -a && ./scripts/feeds install -a
 
-      - name: Restore ccache
-        id: ccache
-        uses: actions/cache/restore@v4
+      - name: Cache (toolchain + ccache)
+        uses: stupidloud/cachewrtbuild@main
         with:
-          path: openwrt/.ccache
-          key: ccache-${{ github.run_id }}
-          restore-keys: ccache-
-
-      - name: Restore toolchain cache
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            openwrt/staging_dir/toolchain-x86_64_gcc-14.3.0_musl
-            openwrt/staging_dir/host
-            openwrt/staging_dir/hostpkg
-          key: toolchain-v4
+          ccache: true
+          toolchain: true
+          skip: true
+          prefix: openwrt
+          mixkey: x86-64
 
       - name: Setup (packages, patches, toolchain, config, turboacc)
-        id: setup
         run: |
           chmod +x $GITHUB_WORKSPACE/setup.sh
           bash $GITHUB_WORKSPACE/setup.sh $GITHUB_WORKSPACE/openwrt $GITHUB_WORKSPACE
-          # Determine if toolchain was freshly built
-          if [ -f /tmp/toolchain_fresh ]; then
-            echo "cache-hit=false" >> $GITHUB_OUTPUT
-          else
-            echo "cache-hit=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Cache toolchain + host tools
-        if: steps.setup.outputs.cache-hit == 'false'
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            openwrt/staging_dir/toolchain-x86_64_gcc-14.3.0_musl
-            openwrt/staging_dir/host
-            openwrt/staging_dir/hostpkg
-          key: toolchain-v4
 
 
 
@@ -97,12 +72,6 @@ jobs:
       - name: Build firmware
         run: |
           cd openwrt && make -j$(($(nproc) + 1))
-
-      - name: Save ccache
-        uses: actions/cache/save@v4
-        with:
-          path: openwrt/.ccache
-          key: ccache-${{ github.run_id }}
 
       - name: Release
         uses: softprops/action-gh-release@v2.2.1
