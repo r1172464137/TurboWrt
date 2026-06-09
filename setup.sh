@@ -41,31 +41,16 @@ for sub in luci-app-homeproxy luci-app-nikki luci-app-passwall luci-app-dae luci
 done
 cd "$OPENWRT_DIR"
 
-echo "=== Setting up external toolchain in .config ==="
-if [ ! -d staging_dir/toolchain-x86_64_gcc-14.3.0_musl ]; then
-  echo "=== Downloading prebuilt toolchain to staging_dir ==="
+echo "=== Downloading prebuilt toolchain (if not cached) ==="
+if [ ! -f staging_dir/.toolchain_extracted ]; then
   wget -q "https://downloads.openwrt.org/releases/25.12.4/targets/x86/64/openwrt-toolchain-25.12.4-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.zst" -O /tmp/tc.tar.zst
   tar --zstd -xf /tmp/tc.tar.zst -C /tmp/
   rm /tmp/tc.tar.zst
   TC_DIR=$(ls -d /tmp/openwrt-toolchain-*/toolchain-*/ | head -1)
   mkdir -p staging_dir/toolchain-x86_64_gcc-14.3.0_musl
   cp -a "$TC_DIR"/* staging_dir/toolchain-x86_64_gcc-14.3.0_musl/
-  touch /tmp/toolchain_fresh
+  touch staging_dir/.toolchain_extracted
 fi
-
-# Always set external toolchain in .config (needed even if cached)
-# Write to a temp file first, then merge
-PREFIX=$(ls staging_dir/toolchain-x86_64_gcc-14.3.0_musl/bin/ 2>/dev/null | grep -E '.*-gcc$' | head -1 | sed 's/-gcc//')
-cat > /tmp/tc-config << EOF
-CONFIG_EXTERNAL_TOOLCHAIN=y
-CONFIG_TOOLCHAIN_ROOT="\$(TOPDIR)/staging_dir/toolchain-x86_64_gcc-14.3.0_musl"
-CONFIG_TOOLCHAIN_PREFIX="$PREFIX"
-CONFIG_TARGET_NAME="x86_64-openwrt-linux-musl"
-CONFIG_EXTERNAL_TOOLCHAIN_LIBC_USE_MUSL=y
-CONFIG_EXTERNAL_GCC_VERSION="14.3.0"
-EOF
-cat /tmp/tc-config >> .config 2>/dev/null || cp /tmp/tc-config .config
-rm /tmp/tc-config
 
 echo "=== Applying config (merge with toolchain settings) ==="
 if [ -f .config ]; then
