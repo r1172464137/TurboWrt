@@ -42,14 +42,31 @@ done
 cd "$OPENWRT_DIR"
 
 echo "=== Downloading prebuilt toolchain (if not cached) ==="
-if [ ! -f staging_dir/.toolchain_extracted ]; then
+if [ ! -d staging_dir/toolchain-x86_64_gcc-14.3.0_musl ]; then
   wget -q "https://downloads.openwrt.org/releases/25.12.4/targets/x86/64/openwrt-toolchain-25.12.4-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.zst" -O /tmp/tc.tar.zst
   tar --zstd -xf /tmp/tc.tar.zst -C /tmp/
   rm /tmp/tc.tar.zst
   TC_DIR=$(ls -d /tmp/openwrt-toolchain-*/toolchain-*/ | head -1)
   mkdir -p staging_dir/toolchain-x86_64_gcc-14.3.0_musl
   cp -a "$TC_DIR"/* staging_dir/toolchain-x86_64_gcc-14.3.0_musl/
-  touch staging_dir/.toolchain_extracted
+  # Set external toolchain so make skips GCC compilation (first build)
+  PREFIX=$(ls staging_dir/toolchain-x86_64_gcc-14.3.0_musl/bin/ | grep -E '.*-gcc$' | head -1 | sed 's/-gcc//')
+  {
+    echo "CONFIG_EXTERNAL_TOOLCHAIN=y"
+    echo "CONFIG_TOOLCHAIN_ROOT=\"\$(TOPDIR)/staging_dir/toolchain-x86_64_gcc-14.3.0_musl\""
+    echo "CONFIG_TOOLCHAIN_PREFIX=\"$PREFIX\""
+    echo "CONFIG_TARGET_NAME=\"x86_64-openwrt-linux-musl\""
+    echo "CONFIG_EXTERNAL_TOOLCHAIN_LIBC_USE_MUSL=y"
+    echo "CONFIG_EXTERNAL_GCC_VERSION=\"14.3.0\""
+  } >> .config 2>/dev/null || {
+    # .config doesn't exist yet, create it
+    echo "CONFIG_EXTERNAL_TOOLCHAIN=y" > .config
+    echo "CONFIG_TOOLCHAIN_ROOT=\"\$(TOPDIR)/staging_dir/toolchain-x86_64_gcc-14.3.0_musl\"" >> .config
+    echo "CONFIG_TOOLCHAIN_PREFIX=\"$PREFIX\"" >> .config
+    echo "CONFIG_TARGET_NAME=\"x86_64-openwrt-linux-musl\"" >> .config
+    echo "CONFIG_EXTERNAL_TOOLCHAIN_LIBC_USE_MUSL=y" >> .config
+    echo "CONFIG_EXTERNAL_GCC_VERSION=\"14.3.0\"" >> .config
+  }
 fi
 
 echo "=== Applying config (merge with toolchain settings) ==="
