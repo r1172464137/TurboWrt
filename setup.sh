@@ -55,8 +55,13 @@ if [ ! -d staging_dir/toolchain-x86_64_gcc-14.3.0_musl ]; then
   touch /tmp/toolchain_fresh
 fi
 
-echo "=== Applying config ==="
-cp "$WORKSPACE/config.seed" .config
+echo "=== Applying config (merge with toolchain settings) ==="
+if [ -f .config ]; then
+  # .config exists from ext-toolchain.sh, merge our settings on top
+  cat "$WORKSPACE/config.seed" >> .config
+else
+  cp "$WORKSPACE/config.seed" .config
+fi
 
 echo "=== Applying kernel patches ==="
 cp -rf "$WORKSPACE/patches/kernel/bbr3/"* target/linux/generic/backport-6.12/
