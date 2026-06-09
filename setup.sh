@@ -48,12 +48,13 @@ if [ ! -d staging_dir/toolchain-x86_64_gcc-14.3.0_musl ]; then
   rm /tmp/tc.tar.zst
   ./scripts/ext-toolchain.sh --toolchain /tmp/openwrt-toolchain-*/toolchain-*/ --config x86/64
   make defconfig
-  # Compile host tools
   make tools/compile -j$(nproc)
   make toolchain/compile -j$(nproc)
-  # Marker for cache save
   touch /tmp/toolchain_fresh
 fi
+
+# Always compile host tools (stamp files in build_dir are not cached)
+make tools/compile -j$(nproc)
 
 echo "=== Applying config (merge with toolchain settings) ==="
 if [ -f .config ]; then

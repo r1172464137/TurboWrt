@@ -52,9 +52,7 @@ jobs:
             openwrt/staging_dir/toolchain-x86_64_gcc-14.3.0_musl
             openwrt/staging_dir/host
             openwrt/staging_dir/hostpkg
-            openwrt/build_dir/host
-            openwrt/build_dir/toolchain-x86_64_gcc-14.3.0_musl
-          key: toolchain-v4
+          key: toolchain-v5
 
       - name: Setup (packages, patches, toolchain, config, turboacc)
         id: setup
@@ -76,9 +74,7 @@ jobs:
             openwrt/staging_dir/toolchain-x86_64_gcc-14.3.0_musl
             openwrt/staging_dir/host
             openwrt/staging_dir/hostpkg
-            openwrt/build_dir/host
-            openwrt/build_dir/toolchain-x86_64_gcc-14.3.0_musl
-          key: toolchain-v4
+          key: toolchain-v5
 
       - name: Download package sources
         run: |
