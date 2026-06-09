@@ -45,23 +45,33 @@ jobs:
           git clone --depth 1 --branch v25.12.4 https://github.com/openwrt/openwrt.git openwrt
           cd openwrt && ./scripts/feeds update -a && ./scripts/feeds install -a
 
-      - name: Restore toolchain cache
-        id: cache-toolchain
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            openwrt/staging_dir/toolchain-x86_64_gcc-14.3.0_musl
-            openwrt/staging_dir/host
-            openwrt/staging_dir/hostpkg
-            openwrt/build_dir/host
-          key: toolchain-x86_64-gcc-14.3.0-v2
-
-      - name: Setup
+      - name: Setup (packages, config, patches, turboacc)
         run: |
           chmod +x $GITHUB_WORKSPACE/setup.sh
           bash $GITHUB_WORKSPACE/setup.sh $GITHUB_WORKSPACE/openwrt $GITHUB_WORKSPACE
 
-      - name: Save toolchain cache (immediately after setup)
+      - name: Download toolchain + compile tools
+        id: toolchain
+        run: |
+          cd openwrt
+          if [ -d staging_dir/toolchain-x86_64_gcc-14.3.0_musl ]; then
+            echo "cache-hit=true" >> $GITHUB_OUTPUT
+            echo "=== Toolchain already cached ==="
+          else
+            echo "cache-hit=false" >> $GITHUB_OUTPUT
+            echo "=== Downloading prebuilt toolchain ==="
+            wget -q "https://downloads.openwrt.org/releases/25.12.4/targets/x86/64/openwrt-toolchain-25.12.4-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.zst" -O /tmp/tc.tar.zst
+            tar --zstd -xf /tmp/tc.tar.zst -C /tmp/
+            rm /tmp/tc.tar.zst
+            ./scripts/ext-toolchain.sh --toolchain /tmp/openwrt-toolchain-*/toolchain-*/ --overwrite-config --config x86/64
+            make defconfig
+            echo "=== Compiling host tools ==="
+            make tools/compile -j$(nproc)
+            make toolchain/compile -j$(nproc)
+          fi
+
+      - name: Cache toolchain + host tools
+        if: steps.toolchain.outputs.cache-hit == 'false'
         uses: actions/cache/save@v4
         with:
           path: |
@@ -69,10 +79,10 @@ jobs:
             openwrt/staging_dir/host
             openwrt/staging_dir/hostpkg
             openwrt/build_dir/host
-          key: toolchain-v2
+            openwrt/build_dir/toolchain-x86_64_gcc-14.3.0_musl
+          key: toolchain-v3
 
-      - name: Download
-        if: steps.cache-toolchain.outputs.cache-hit != 'true'
+      - name: Download package sources
         run: |
           cd openwrt && make download -j50
 
@@ -80,7 +90,7 @@ jobs:
         if: ${{ github.event.inputs.ssh_connect == 'true' }}
         uses: mxschmitt/action-tmate@v3
 
-      - name: Build
+      - name: Build firmware
         id: build
         continue-on-error: true
         run: |
