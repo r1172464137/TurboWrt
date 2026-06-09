@@ -43,6 +43,7 @@ cd "$OPENWRT_DIR"
 
 echo "=== Setting up toolchain (download if not cached) ==="
 if [ ! -d staging_dir/toolchain-x86_64_gcc-14.3.0_musl ]; then
+  echo "=== Downloading prebuilt toolchain ==="
   wget -q "https://downloads.openwrt.org/releases/25.12.4/targets/x86/64/openwrt-toolchain-25.12.4-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.zst" -O /tmp/tc.tar.zst
   tar --zstd -xf /tmp/tc.tar.zst -C /tmp/
   rm /tmp/tc.tar.zst
@@ -52,12 +53,8 @@ if [ ! -d staging_dir/toolchain-x86_64_gcc-14.3.0_musl ]; then
   touch /tmp/toolchain_fresh
 fi
 
-# Compile host tools (always needed for stamp files in build_dir)
-make tools/compile -j$(nproc)
-
 echo "=== Applying config (merge with toolchain settings) ==="
 if [ -f .config ]; then
-  # .config exists from ext-toolchain.sh, merge our settings on top
   cat "$WORKSPACE/config.seed" >> .config
 else
   cp "$WORKSPACE/config.seed" .config
@@ -75,10 +72,13 @@ echo "=== Adding turboacc (no SFE) ==="
 curl -sSL https://raw.githubusercontent.com/chenmozhijin/turboacc/luci/add_turboacc.sh -o add_turboacc.sh
 bash add_turboacc.sh --no-sfe
 
-# Remove 952 patch - turboacc re-adds it but kernel 6.12.87 has it built-in
 rm -f target/linux/generic/hack-6.12/952-add-net-conntrack-events-support-multiple-registrant.patch
 
 echo "=== Running defconfig ==="
 make defconfig
+
+# Compile host tools AFTER final config (prevent config hash mismatch in make world)
+echo "=== Compiling host tools ==="
+make tools/compile -j$(nproc)
 
 echo "=== Setup complete ==="
