@@ -38,12 +38,20 @@ jobs:
             libncurses-dev libssl-dev libelf-dev zlib1g-dev bison flex git unzip wget \
             python3 python3-pip python3-docutils python3-pyelftools rsync file curl \
             gettext libgmp3-dev libmpc-dev libmpfr-dev patch bc lz4 zstd p7zip p7zip-full \
-            xz-utils jq
+            xz-utils jq ccache
 
       - name: Clone source & feeds
         run: |
           git clone --depth 1 --branch v25.12.4 https://github.com/openwrt/openwrt.git openwrt
           cd openwrt && ./scripts/feeds update -a && ./scripts/feeds install -a
+
+      - name: Restore ccache
+        id: ccache
+        uses: actions/cache/restore@v4
+        with:
+          path: openwrt/.ccache
+          key: ccache-${{ github.run_id }}
+          restore-keys: ccache-
 
       - name: Restore toolchain cache
         uses: actions/cache/restore@v4
@@ -76,6 +84,8 @@ jobs:
             openwrt/staging_dir/hostpkg
           key: toolchain-v4
 
+
+
       - name: Download package sources
         run: |
           cd openwrt && make download -j50
@@ -87,6 +97,12 @@ jobs:
       - name: Build firmware
         run: |
           cd openwrt && make -j$(($(nproc) + 1))
+
+      - name: Save ccache
+        uses: actions/cache/save@v4
+        with:
+          path: openwrt/.ccache
+          key: ccache-${{ github.run_id }}
 
       - name: Release
         uses: softprops/action-gh-release@v2.2.1
