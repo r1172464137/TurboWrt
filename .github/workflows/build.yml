@@ -53,7 +53,8 @@ jobs:
             openwrt/staging_dir/toolchain-x86_64_gcc-14.3.0_musl
             openwrt/staging_dir/host
             openwrt/staging_dir/hostpkg
-          key: toolchain-x86_64-gcc-14.3.0-v1
+            openwrt/build_dir/host
+          key: toolchain-x86_64-gcc-14.3.0-v2
 
       - name: Setup
         run: |
@@ -67,7 +68,8 @@ jobs:
             openwrt/staging_dir/toolchain-x86_64_gcc-14.3.0_musl
             openwrt/staging_dir/host
             openwrt/staging_dir/hostpkg
-          key: toolchain-x86_64-gcc-14.3.0-v1
+            openwrt/build_dir/host
+          key: toolchain-v2
 
       - name: Download
         if: steps.cache-toolchain.outputs.cache-hit != 'true'
