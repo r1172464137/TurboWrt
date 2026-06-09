@@ -47,6 +47,7 @@ sed -i 's/rpctimeout \?\? 20/rpctimeout ?? 60/' feeds/luci/modules/luci-base/htd
 
 # === Batch 7: ttyd no login + disable CPD ===
 sed -i 's/command .\/bin\/login/command \/bin\/sh/' feeds/packages/utils/ttyd/files/ttyd.config
+sed -i '/procd_set_param stderr 1/a\\tprocd_set_param env LWS_CPD_DISABLE 1' feeds/packages/utils/ttyd/files/ttyd.init
 # Fix Docker package versions (APK doesn't allow "v" prefix)
 sed -i 's/PKG_VERSION:=v0\.3\.4/PKG_VERSION:=0.3.4/' feeds/luci/collections/luci-lib-docker/Makefile 2>/dev/null || true
 sed -i 's/PKG_VERSION:=v0\.5\.26/PKG_VERSION:=0.5.26/' feeds/luci/applications/luci-app-dockerman/Makefile 2>/dev/null || true
