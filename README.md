@@ -139,7 +139,7 @@
 
 ### 下载固件
 
-前往 [Releases](https://github.com/r1172464137/openwrt-custom-fw/releases) 页面下载。
+前往 [Releases](https://github.com/r1172464137/TurboWrt/releases) 页面下载。
 推荐使用 **`ext4-combined-efi.img.gz`**（UEFI 引导）。
 
 ### 刷机
@@ -154,7 +154,7 @@ dd if=openwrt-x86-64-generic-ext4-combined-efi.img of=/dev/sdX bs=4M status=prog
 
 ### GitHub Actions 云编译
 
-1. 前往 [Actions](https://github.com/r1172464137/openwrt-custom-fw/actions) 页面
+1. 前往 [Actions](https://github.com/r1172464137/TurboWrt/actions) 页面
 2. 点击 **Run workflow**
 3. 等待编译完成（约 3-4 小时，第二次起因缓存会更快）
 4. 下载生成的固件 Artifacts
