@@ -41,13 +41,18 @@ for sub in luci-app-homeproxy luci-app-nikki luci-app-passwall luci-app-dae luci
 done
 cd "$OPENWRT_DIR"
 
-echo "=== Downloading prebuilt toolchain ==="
-TOOLCHAIN_URL="https://downloads.openwrt.org/releases/25.12.4/targets/x86/64"
-TOOLCHAIN_FILE="openwrt-toolchain-25.12.4-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
-wget -q "$TOOLCHAIN_URL/$TOOLCHAIN_FILE" -O /tmp/toolchain.tar.zst
-tar --zstd -xf /tmp/toolchain.tar.zst -C /tmp/
-rm -f /tmp/toolchain.tar.zst
-./scripts/ext-toolchain.sh --toolchain /tmp/openwrt-toolchain-*/toolchain-*/ --overwrite-config --config x86/64
+if [ ! -d staging_dir/toolchain-x86_64_gcc-14.3.0_musl ]; then
+  echo "=== Downloading prebuilt toolchain ==="
+  TOOLCHAIN_URL="https://downloads.openwrt.org/releases/25.12.4/targets/x86/64"
+  TOOLCHAIN_FILE="openwrt-toolchain-25.12.4-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
+  wget -q "$TOOLCHAIN_URL/$TOOLCHAIN_FILE" -O /tmp/toolchain.tar.zst
+  tar --zstd -xf /tmp/toolchain.tar.zst -C /tmp/
+  rm -f /tmp/toolchain.tar.zst
+  ./scripts/ext-toolchain.sh --toolchain /tmp/openwrt-toolchain-*/toolchain-*/ --overwrite-config --config x86/64
+else
+  echo "=== Toolchain cached, using it ==="
+  ./scripts/ext-toolchain.sh --toolchain staging_dir/toolchain-x86_64_gcc-14.3.0_musl --overwrite-config --config x86/64
+fi
 
 echo "=== Applying config ==="
 cp "$WORKSPACE/config.seed" .config
