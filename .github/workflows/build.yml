@@ -85,15 +85,8 @@ jobs:
         uses: mxschmitt/action-tmate@v3
 
       - name: Build firmware
-        id: build
-        continue-on-error: true
         run: |
-          cd openwrt && IGNORE_ERRORS=1 make -j$(($(nproc) + 1))
-
-      - name: Error retry
-        if: steps.build.outcome == 'failure'
-        run: |
-          cd openwrt && make -j1 V=s
+          cd openwrt && make -j$(($(nproc) + 1))
 
       - name: Release
         uses: softprops/action-gh-release@v2.2.1
