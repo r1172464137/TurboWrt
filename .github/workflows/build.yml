@@ -81,12 +81,17 @@ jobs:
           cd openwrt
           make package/new/openwrt_helloworld/dae/compile V=s -j1 2>&1 | tail -50
 
+      - name: Generate release tag
+        id: tag
+        run: echo "name=Firmware-$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
+
       - name: Release
         if: always()
         uses: softprops/action-gh-release@v2.2.1
         with:
-          tag_name: "Firmware-$(date +%Y%m%d-%H%M)"
+          tag_name: ${{ steps.tag.outputs.name }}
           files: |
             openwrt/bin/targets/x86/64/openwrt-x86-64-generic-ext4-combined-efi.img.gz
             openwrt/bin/targets/x86/64/openwrt-x86-64-generic-squashfs-combined-efi.img.gz
-          fail_on_unmatched: false
+          fail_on_unmatched_files: true
+          prerelease: true
