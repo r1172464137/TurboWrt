@@ -16,8 +16,8 @@ git clone --depth 1 https://github.com/sbwml/luci-app-quickfile.git package/new/
 git clone --depth 1 https://github.com/sirpdboy/luci-app-ddns-go.git package/new/luci-app-ddns-go
 git clone --depth 1 https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic.git package/new/luci-app-unblockneteasemusic
 git clone --depth 1 https://github.com/EasyTier/luci-app-easytier.git package/new/luci-app-easytier
-git clone --depth 1 https://github.com/timsaya/luci-app-bandix.git package/new/luci-app-bandix
-git clone --depth 1 https://github.com/timsaya/openwrt-bandix.git package/new/openwrt-bandix
+git clone --depth 1 https://github.com/timsaya/luci-app-bandix-plus.git package/new/luci-app-bandix-plus
+git clone --depth 1 https://github.com/timsaya/openwrt-bandix-plus.git package/new/openwrt-bandix-plus
 git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/new/luci-theme-argon
 git clone --depth 1 https://github.com/eamonxg/luci-theme-aurora.git package/new/luci-theme-aurora
 git clone --depth 1 https://github.com/eamonxg/luci-theme-shadcn.git package/new/luci-theme-shadcn
@@ -28,8 +28,8 @@ fix_nested() {
   local dir="$1" sub="$2"
   [ -d "$dir/$sub" ] && cp -rf "$dir/$sub/"* "$dir/" && rm -rf "$dir/$sub"
 }
-fix_nested "package/new/luci-app-bandix" "luci-app-bandix"
-fix_nested "package/new/openwrt-bandix" "openwrt-bandix"
+fix_nested "package/new/luci-app-bandix-plus" "luci-app-bandix-plus"
+fix_nested "package/new/openwrt-bandix-plus" "openwrt-bandix-plus"
 fix_nested "package/new/luci-app-lucky" "luci-app-lucky"
 fix_nested "package/new/luci-app-easytier" "luci-app-easytier"
 fix_nested "package/new/luci-app-ddns-go" "luci-app-ddns-go"
