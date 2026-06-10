@@ -92,7 +92,26 @@ EOF
 # === Batch 11: conntrack ===
 echo "net.netfilter.nf_conntrack_tcp_max_retrans=5" >> package/kernel/linux/files/sysctl-nf-conntrack.conf
 
-# === Batch 12: DHCPv6 hotplug ===
+# === Batch 12: turboacc TCP CCA selector ===
+TURBO_DIR="feeds/luci/applications/luci-app-turboacc"
+if [ -d "$TURBO_DIR" ]; then
+  # Replace CBI model with dropdown version
+  sed -i '/if nixio.fs.access.*tcp_bbr/,/^end$/c\
+bbr_cca = s:option(ListValue, "bbr_cca", translate("TCP CCA"))\
+bbr_cca:value("", translate("System Default"))\
+bbr_cca:value("bbr", translate("BBRv3"))\
+bbr_cca:value("cubic", translate("CUBIC"))\
+bbr_cca:value("reno", translate("Reno"))\
+bbr_cca.default = ""\
+bbr_cca.rmempty = true\
+\
+return m' "$TURBO_DIR/luasrc/model/cbi/turboacc.lua"
+  # Fix init script - change default value and apply logic
+  sed -i 's/config_get "bbr_cca" "config" "bbr_cca" "0"/config_get "bbr_cca" "config" "bbr_cca" ""/' "$TURBO_DIR/root/etc/init.d/turboacc"
+  sed -i '/\[.*bbr_cca.*-eq.*"1"/,/fi/c\	case "${bbr_cca}" in\n\t\t""|"0"|"1") ;;\n\t\t*) sysctl -w net.ipv4.tcp_congestion_control="${bbr_cca}" ;;\n\tesac' "$TURBO_DIR/root/etc/init.d/turboacc"
+fi
+
+# === Batch 13: DHCPv6 hotplug ===
 patch -p1 < $GITHUB_WORKSPACE/patches/odhcp6c/1002-odhcp6c-support-dhcpv6-hotplug.patch
 
 echo "diy.sh completed"
