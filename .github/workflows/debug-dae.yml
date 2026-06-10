@@ -1,0 +1,44 @@
+name: Debug DAE Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  debug:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq build-essential gcc-multilib g++-multilib \
+            libncurses-dev libssl-dev libelf-dev zlib1g-dev bison flex git unzip wget \
+            python3 python3-pip python3-pyelftools rsync file curl gettext \
+            libgmp3-dev libmpc-dev libmpfr-dev patch bc lz4 zstd xz-utils jq
+
+      - name: Clone source & feeds
+        run: |
+          git clone --depth 1 --branch v25.12.4 https://github.com/openwrt/openwrt.git openwrt
+          cd openwrt && ./scripts/feeds update -a && ./scripts/feeds install -a
+
+      - name: Clone dae package
+        run: |
+          cd openwrt
+          git clone --depth 1 https://github.com/sbwml/openwrt_helloworld.git package/new/openwrt_helloworld
+          ln -sf openwrt_helloworld/luci-app-dae package/new/luci-app-dae 2>/dev/null || true
+
+      - name: Compile toolchain
+        run: |
+          cd openwrt
+          echo "CONFIG_TARGET_x86=y" > .config
+          echo "CONFIG_TARGET_x86_64=y" >> .config
+          echo "CONFIG_PACKAGE_dae=y" >> .config
+          make defconfig
+          make tools/compile -j$(nproc)
+          make toolchain/compile -j$(nproc)
+
+      - name: Compile dae with V=s
+        run: |
+          cd openwrt
+          make package/new/openwrt_helloworld/dae/compile V=s -j1 2>&1
