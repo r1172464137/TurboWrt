@@ -85,6 +85,16 @@ jobs:
         id: tag
         run: echo "name=Firmware-$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
 
+      - name: Upload artifact (backup)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenWrt-firmware
+          path: |
+            openwrt/bin/targets/x86/64/*.gz
+            openwrt/bin/targets/x86/64/*.manifest
+          if-no-files-found: ignore
+
       - name: Release
         if: always()
         continue-on-error: true
