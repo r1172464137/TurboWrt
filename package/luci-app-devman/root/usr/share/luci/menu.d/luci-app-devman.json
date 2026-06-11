@@ -1,0 +1,28 @@
+{
+	"admin/network/devman": {
+		"title": "Device Manager",
+		"order": 50,
+		"action": {
+			"type": "firstchild"
+		},
+		"depends": {
+			"acl": [ "luci-app-devman" ]
+		}
+	},
+	"admin/network/devman/overview": {
+		"title": "Overview",
+		"order": 1,
+		"action": {
+			"type": "view",
+			"path": "devman/overview"
+		}
+	},
+	"admin/network/devman/rules": {
+		"title": "Rules",
+		"order": 2,
+		"action": {
+			"type": "view",
+			"path": "devman/rules"
+		}
+	}
+}

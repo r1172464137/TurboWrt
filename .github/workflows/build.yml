@@ -70,16 +70,8 @@ jobs:
         uses: mxschmitt/action-tmate@v3
 
       - name: Build firmware
-        id: build
-        continue-on-error: true
         run: |
-          cd openwrt && IGNORE_ERRORS=1 make -j$(($(nproc) + 1))
-
-      - name: Error retry V=s
-        if: steps.build.outcome == 'failure'
-        run: |
-          cd openwrt
-          make package/new/openwrt_helloworld/dae/compile V=s -j1 2>&1 | tail -50
+          cd openwrt && make -j$(($(nproc) + 1))
 
       - name: Generate release tag
         id: tag

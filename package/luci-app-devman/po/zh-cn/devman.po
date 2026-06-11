@@ -1,0 +1,59 @@
+msgid "Device Manager"
+msgstr "设备管理"
+
+msgid "Overview"
+msgstr "设备列表"
+
+msgid "Rules"
+msgstr "规则"
+
+msgid "Alias"
+msgstr "别名"
+
+msgid "IP"
+msgstr "IP"
+
+msgid "Hostname"
+msgstr "主机名"
+
+msgid "Speed ↓"
+msgstr "下载速度"
+
+msgid "Speed ↑"
+msgstr "上传速度"
+
+msgid "Status"
+msgstr "状态"
+
+msgid "Actions"
+msgstr "操作"
+
+msgid "Online"
+msgstr "在线"
+
+msgid "Offline"
+msgstr "离线"
+
+msgid "Blocked"
+msgstr "已封禁"
+
+msgid "Block"
+msgstr "封禁"
+
+msgid "Unblock"
+msgstr "解封"
+
+msgid "Limit"
+msgstr "限速"
+
+msgid "Enter rate limit in kbps (0=unlimited):"
+msgstr "输入限速值(kbps，0=不限):"
+
+msgid "Device Rules"
+msgstr "设备规则"
+
+msgid "Rules apply only to WAN (internet) traffic. LAN traffic between devices is never affected."
+msgstr "规则只影响 WAN(互联网)方向，局域网设备间通信不受影响。"
+
+msgid "Blocked devices and speed limits are configured from the Overview page."
+msgstr "封禁和限速请在设备列表页面设置。"

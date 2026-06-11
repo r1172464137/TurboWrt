@@ -6902,6 +6902,8 @@ CONFIG_PACKAGE_cgi-io=y
 # CONFIG_PACKAGE_clamav is not set
 # CONFIG_PACKAGE_cloudflared is not set
 CONFIG_PACKAGE_dae=y
+CONFIG_PACKAGE_devman=y
+CONFIG_PACKAGE_luci-app-devman=y
 CONFIG_DAE_USE_VMLINUX_BTF=y
 # CONFIG_DAE_USE_BPF_DEPENDS is not set
 # CONFIG_PACKAGE_daed is not set
