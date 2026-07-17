@@ -28,6 +28,7 @@ jobs:
       - name: 克隆 img-installer 并构建 ISO
         run: |
           git clone --depth 1 https://github.com/wukongdaily/img-installer.git /tmp/installer
+          chmod -R +x /tmp/installer/supportFiles
           chmod +x /tmp/installer/custom.sh
           cd /tmp/installer && bash custom.sh "${{ github.event.inputs.download_url }}"
 
